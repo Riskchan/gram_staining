@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["cat", "dog"]
+classes = ["GNR", "GPC"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
@@ -19,7 +19,10 @@ data_dir = "./images"
 # Image data generator
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
+    rotation_range=90,
     zoom_range=0.2,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
     horizontal_flip=True,
     validation_split=0.3
 )
@@ -78,7 +81,7 @@ model.compile(
 
 # Training
 cp_cb = ModelCheckpoint(
-    filepath="weights/dogcat-smallcnn.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
+    filepath="weights/smallcnn.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
     monitor="val_loss",
     verbose=1,
     mode="auto"
