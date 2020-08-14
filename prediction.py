@@ -20,7 +20,7 @@ img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
 
 # Load model
-model = tf.keras.models.load_model("weights/smallcnn30.hdf5")
+model = tf.keras.models.load_model("weights/vgg16-finetuning30.hdf5")
 
 # Load image
 img = image.load_img(input_filename, target_size=(img_height, img_width))
@@ -32,4 +32,5 @@ x = x / 255.0
 
 # Prediction
 pred = model.predict(x)[0]
-print(pred)
+print("{}: {}%".format(classes[0], (1-pred) * 100.0))
+print("{}: {}%".format(classes[1], pred * 100.0))
