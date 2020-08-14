@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras.models import Model
@@ -58,7 +58,7 @@ for layer in vgg16.layers:
     layer.trainable = False
 
 layer_output = vgg16.output
-layer_output = Flatten()(layer_output)
+layer_output = GlobalAveragePooling2D()(layer_output)
 layer_output = Dense(256, activation="relu")(layer_output)
 layer_output = Dropout(0.5)(layer_output)
 layer_output = Dense(1, activation="sigmoid")(layer_output)
