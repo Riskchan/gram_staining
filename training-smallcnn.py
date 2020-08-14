@@ -20,15 +20,15 @@ data_dir = "./images"
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
     rotation_range=90,
-    zoom_range=0.2,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
     horizontal_flip=True,
     validation_split=0.3
 )
 
 train_generator = datagen.flow_from_directory(
     data_dir,
+#    save_to_dir="processed",
     subset="training",
     target_size=(img_width, img_height),
     color_mode="rgb",
@@ -75,13 +75,15 @@ model = Model(layer_input, layer_output)
 model.summary()
 model.compile(
     loss="binary_crossentropy",
-    optimizer="adam",
+#    optimizer=SGD(lr=0.01),
+    optimizer="Adam",
     metrics=["accuracy"]
 )
 
 # Training
 cp_cb = ModelCheckpoint(
-    filepath="weights/smallcnn.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
+#    filepath="weights/smallcnn.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
+    filepath="weights/smallcnn{epoch:02d}.hdf5",
     monitor="val_loss",
     verbose=1,
     mode="auto"
@@ -107,7 +109,7 @@ history = model.fit(
     callbacks=[cp_cb, reduce_lr_cb]
 )
 
-# === 正解率の推移出力 ===
+# Time course
 plt.plot(range(1, len(history.history["accuracy"]) + 1),
          history.history["accuracy"],
          label="acc", ls="-", marker="o")

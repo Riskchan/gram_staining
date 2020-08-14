@@ -14,13 +14,13 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 
 # Parameters
-classes = ["cat", "dog"]
+classes = ["GNR", "GPC"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
 
 # Load model
-model = tf.keras.models.load_model("weights/vgg16-finetuning/dogcat-vgg16-finetuning.30-0.3037-0.2864.hdf5")
+model = tf.keras.models.load_model("weights/smallcnn30.hdf5")
 
 # Load image
 img = image.load_img(input_filename, target_size=(img_height, img_width))

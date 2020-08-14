@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["cat", "dog"]
+classes = ["GNR", "GPC"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
@@ -19,13 +19,16 @@ data_dir = "./images"
 # Image data generator
 datagen = ImageDataGenerator(
     rescale=1.0 / 255,
-    zoom_range=0.2,
+    rotation_range=90,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
     horizontal_flip=True,
     validation_split=0.3
 )
 
 train_generator = datagen.flow_from_directory(
     data_dir,
+    save_to_dir="processed",
     subset="training",
     target_size=(img_width, img_height),
     color_mode="rgb",
