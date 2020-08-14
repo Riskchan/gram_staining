@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import SGD
@@ -7,6 +8,19 @@ from tensorflow.keras.applications import VGG16
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
+# Project name and directories
+ver = "vgg16-extractor"
+
+#base_dir = "./drive/My Drive/" # for Google colab
+base_dir = "./"                 # for local use
+data_dir = base_dir + "images"
+ver_dir = base_dir + ver
+weights_dir = ver_dir + "/weights"
+processed_dir = ver_dir + "/processed"
+
+os.makedirs(weights_dir, exist_ok=True)
+os.makedirs(processed_dir, exist_ok=True)
+
 # Parameters
 batch_size = 32
 epochs = 30
@@ -14,7 +28,6 @@ classes = ["GNR", "GPC"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
-data_dir = "./images"
 
 # Image data generator
 datagen = ImageDataGenerator(
@@ -58,7 +71,7 @@ for layer in vgg16.layers:
     layer.trainable = False
 
 layer_output = vgg16.output
-layer_output = GlobalAveragePooling2D()(layer_output)
+layer_output = Flatten()(layer_output)
 layer_output = Dense(256, activation="relu")(layer_output)
 layer_output = Dropout(0.5)(layer_output)
 layer_output = Dense(1, activation="sigmoid")(layer_output)
@@ -75,7 +88,7 @@ model.compile(
 
 # Training
 cp_cb = ModelCheckpoint(
-    filepath="weights/dogcat-vgg16-extractor.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
+    filepath=weights_dir + "/" + ver + "{epoch:02d}.hdf5",
     monitor="val_loss",
     verbose=1,
     mode="auto"
@@ -111,6 +124,5 @@ plt.plot(range(1, len(history.history["val_accuracy"]) + 1),
 plt.ylabel("accuracy")
 plt.xlabel("epoch")
 plt.legend(loc="best")
-plt.savefig("accuracy.png")
-plt.show()
+plt.savefig(ver_dir + "/accuracy.png")
 
