@@ -24,7 +24,7 @@ os.makedirs(processed_dir, exist_ok=True)
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["GNR", "GPC"]
+classes = ["Escherichia coli", "Staphylococcus aureus"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
@@ -113,15 +113,20 @@ history = model.fit(
     callbacks=[cp_cb, reduce_lr_cb]
 )
 
-# === 正解率の推移出力 ===
-plt.plot(range(1, len(history.history["accuracy"]) + 1),
-         history.history["accuracy"],
-         label="acc", ls="-", marker="o")
-plt.plot(range(1, len(history.history["val_accuracy"]) + 1),
-         history.history["val_accuracy"],
-         label="val_acc", ls="-", marker="x")
-plt.ylabel("accuracy")
-plt.xlabel("epoch")
-plt.legend(loc="best")
-plt.savefig(ver_dir + "/accuracy.png")
+# Trend line
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+rng = range(1, len(history.history["accuracy"]) + 1)
+ax1.plot(rng, history.history["accuracy"], label="acc", ls="-", marker="o")
+ax1.plot(rng, history.history["val_accuracy"], label="val_acc", ls="-", marker="x")
+ax1.set_ylabel("accuracy")
 
+ax2 = ax1.twinx()
+ax2.plot(rng, history.history["loss"], label="loss", ls="-", marker="+")
+
+h1, l1 = ax1.get_legend_handles_labels()
+h2, l2 = ax2.get_legend_handles_labels()
+ax1.legend(h1+h2, l1+l2, loc='best')
+
+plt.xlabel("epoch")
+plt.savefig(ver_dir + "/accuracy.png")
