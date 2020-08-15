@@ -14,7 +14,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 
 # Parameters
-classes = ["Escherichia coli", "GPC"]
+classes = ["Escherichia coli", "Staphylococcus aureus"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
