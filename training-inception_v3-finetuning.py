@@ -4,12 +4,12 @@ from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxP
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import VGG16
+from tensorflow.keras.applications import VGG16, InceptionV3
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
 # Project name and directories
-ver = "vgg16-finetuning"
+ver = "inception_v3-finetuning"
 
 #base_dir = "./drive/My Drive/" # for Google colab
 base_dir = "./"                 # for local use
@@ -65,11 +65,16 @@ print(train_generator.class_indices)
 
 
 # Model definition
-vgg16 = VGG16(include_top=False, weights="imagenet", input_shape=feature_dim)
-for layer in vgg16.layers[:15]:
+base_model = InceptionV3(include_top=False, weights="imagenet", input_shape=feature_dim)
+for layer in base_model.layers[:249]:
     layer.trainable = False
+    if layer.name.startswith('batch_normalization'):
+        layer.trainable = True
 
-layer_output = vgg16.output
+for layer in base_model.layers[249:]:
+    layer.trainable = True
+
+layer_output = base_model.output
 layer_output = Flatten()(layer_output)
 layer_output = Dense(256, activation="relu")(layer_output)
 layer_output = Dropout(0.5)(layer_output)
@@ -77,11 +82,12 @@ layer_output = Dense(1, activation="sigmoid")(layer_output)
 # If class_mode="binary", set 1 to Dense layer
 # If class_mode="categorical", set num_classes to Dense layer
 
-model = Model(vgg16.input, layer_output)
+model = Model(base_model.input, layer_output)
 model.summary()
 model.compile(
     loss="binary_crossentropy",
-    optimizer=SGD(lr=1e-4, momentum=0.9),
+#    optimizer=SGD(lr=1e-4, momentum=0.9),
+    optimizer="Adam",
     metrics=["accuracy"]
 )
 

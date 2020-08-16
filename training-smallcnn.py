@@ -96,7 +96,7 @@ model.compile(
 # Training
 cp_cb = ModelCheckpoint(
 #    filepath="weights/smallcnn.{epoch:02d}-{loss:.4f}-{val_loss:.4f}.hdf5",
-    filepath=weights_dir + "/" + ver + "{epoch:02d}.hdf5",
+    filepath=weights_dir + "/" + "weights{epoch:02d}.hdf5",
     monitor="val_loss",
     verbose=1,
     mode="auto"
