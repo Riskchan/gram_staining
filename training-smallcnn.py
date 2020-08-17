@@ -125,12 +125,14 @@ history = model.fit(
 # Trend line
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
+ax1.set_ylim(0, 1)
+ax1.set_ylabel("accuracy")
 rng = range(1, len(history.history["accuracy"]) + 1)
 ax1.plot(rng, history.history["accuracy"], label="acc", ls="-", marker="o")
 ax1.plot(rng, history.history["val_accuracy"], label="val_acc", ls="-", marker="x")
-ax1.set_ylabel("accuracy")
 
 ax2 = ax1.twinx()
+ax2.set_ylabel("loss")
 ax2.plot(rng, history.history["loss"], label="loss", ls="-", marker="+")
 
 h1, l1 = ax1.get_legend_handles_labels()
