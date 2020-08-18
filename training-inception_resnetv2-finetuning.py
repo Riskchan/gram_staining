@@ -24,7 +24,7 @@ os.makedirs(processed_dir, exist_ok=True)
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["Background", "Escherichia coli"]
+classes = ["Bacillus cereus", "Staphylococcus aureus"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
