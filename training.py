@@ -1,10 +1,11 @@
 import os
 import tensorflow as tf
+from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import VGG16, InceptionV3, InceptionResNetV2
+from tensorflow.keras.applications import VGG16, InceptionV3, InceptionResNetV2, EfficientNetB0
 from tensorflow.python.keras.engine import training
 from tensorflow.python.keras.layers import VersionAwareLayers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -17,6 +18,12 @@ def get_base_model(modelname, input_shape):
         base_model = InceptionResNetV2(include_top=False, weights="imagenet", input_shape=input_shape)
         for layer in base_model.layers[:775]:
             layer.trainable = False
+
+    elif modelname == "EfficientNetB0":
+        base_model = EfficientNetB0(include_top=False, weights="imagenet", input_shape=input_shape)
+        for layer in base_model.layers[-20:]:
+                if not isinstance(layer, layers.BatchNormalization):
+                    layer.trainable = True
 
     elif modelname == "InceptionV3":
         base_model = InceptionV3(include_top=False, weights="imagenet", input_shape=input_shape)
@@ -53,7 +60,7 @@ def get_base_model(modelname, input_shape):
     return base_model
 
 # Project name and directories
-# Choose one from following  SmallCNN, VGG16, InceptionV3, InceptionResNetV2
+# Choose one from following  SmallCNN, VGG16, InceptionV3, InceptionResNetV2, EfficientNetB0
 ver = "InceptionResNetV2"
 
 #base_dir = "./drive/My Drive/" # for Google colab
@@ -69,7 +76,7 @@ os.makedirs(processed_dir, exist_ok=True)
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["Bacillus cereus", "Staphylococcus aureus"]
+classes = ["Enterococcus faecalis", "Streptococcus agalactiae"]
 num_classes = len(classes)
 img_width, img_height = 128, 128
 feature_dim = (img_width, img_height, 3)
