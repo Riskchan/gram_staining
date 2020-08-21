@@ -6,13 +6,13 @@ from tensorflow.keras.preprocessing import image
 input_filenames = sys.argv[1:]
 
 # Parameters
-classes = ["Escherichia coli", "Staphylococcus aureus"]
+classes = ["Enterococcus faecalis", "Streptococcus agalactiae"]
 num_classes = len(classes)
-img_width, img_height = 128, 128
+img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)
 
 # Load model
-model = tf.keras.models.load_model("inception_resnetv2-finetuning/weights/weights30.hdf5")
+model = tf.keras.models.load_model("InceptionResNetV2/weights-InceptionResNetV2.hdf5")
 
 # Load image
 for input_filename in input_filenames:

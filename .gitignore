@@ -1,3 +1,4 @@
 accuracy.png
 images
 weights
+*.hdf5

@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications import VGG16, InceptionV3, InceptionResNetV2, EfficientNetB0
 from tensorflow.python.keras.engine import training
@@ -67,10 +67,8 @@ ver = "InceptionResNetV2"
 base_dir = "./"                 # for local use
 data_dir = base_dir + "images"
 ver_dir = base_dir + ver
-weights_dir = ver_dir + "/weights"
 processed_dir = ver_dir + "/processed"
 
-os.makedirs(weights_dir, exist_ok=True)
 os.makedirs(processed_dir, exist_ok=True)
 
 # Parameters
@@ -78,7 +76,7 @@ batch_size = 32
 epochs = 30
 classes = ["Enterococcus faecalis", "Streptococcus agalactiae"]
 num_classes = len(classes)
-img_width, img_height = 128, 128
+img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)
 
 # Image data generator
@@ -119,7 +117,7 @@ layer_output = base_model.output
 layer_output = Flatten()(layer_output)
 layer_output = Dense(256, activation="relu")(layer_output)
 layer_output = Dropout(0.5)(layer_output)
-layer_output = Dense(1, activation="sigmoid")(layer_output)
+layer_output = Dense(1, activation="sigmoid", kernel_regularizer=tf.keras.regularizers.l2(.0005))(layer_output)
 # If class_mode="binary", set 1 to Dense layer
 # If class_mode="categorical", set num_classes to Dense layer
 
@@ -134,10 +132,19 @@ model.compile(
 
 # Training
 cp_cb = ModelCheckpoint(
-    filepath=weights_dir + "/" + "weights{epoch:02d}.hdf5",
+    filepath=ver_dir + "/" + "weights-" + ver + ".hdf5",
     monitor="val_loss",
+    save_best_only=True,
+    save_weights_only=False,
     verbose=1,
-    mode="auto"
+    mode="min"
+)
+
+es_cb = EarlyStopping(
+    monitor='val_loss', 
+    patience=2, 
+    verbose=1, 
+    mode='auto'
 )
 
 reduce_lr_cb = ReduceLROnPlateau(
@@ -172,6 +179,7 @@ ax1.plot(rng, history.history["val_accuracy"], label="val_acc", ls="-", marker="
 ax2 = ax1.twinx()
 ax2.set_ylabel("loss")
 ax2.plot(rng, history.history["loss"], label="loss", ls="-", marker="+")
+ax2.plot(rng, history.history["val_loss"], label="val_loss", ls="-", marker="*")
 
 h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
