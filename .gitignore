@@ -2,3 +2,4 @@ accuracy.png
 images
 weights
 *.hdf5
+__pycache__
