@@ -74,7 +74,7 @@ os.makedirs(processed_dir, exist_ok=True)
 # Parameters
 batch_size = 32
 epochs = 30
-classes = ["Enterococcus faecalis", "Streptococcus agalactiae"]
+classes = [filename for filename in os.listdir(data_dir) if not filename.startswith('.')]
 num_classes = len(classes)
 img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)

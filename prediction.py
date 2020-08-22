@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 import tensorflow as tf
@@ -5,8 +6,11 @@ from tensorflow.keras.preprocessing import image
 
 input_filenames = sys.argv[1:]
 
+base_dir = "./"
+data_dir = base_dir + "images"
+
 # Parameters
-classes = ["Enterococcus faecalis", "Streptococcus agalactiae"]
+classes = [filename for filename in os.listdir(data_dir) if not filename.startswith('.')]
 num_classes = len(classes)
 img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)
