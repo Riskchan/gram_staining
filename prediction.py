@@ -29,6 +29,12 @@ for input_filename in input_filenames:
 
     # Prediction
     pred = model.predict(x)[0]
+
+    # Prediction
     print("{}".format(input_filename))
-    print("{}: {}%".format(classes[0], (1-pred) * 100.0))
-    print("{}: {}%".format(classes[1], pred * 100.0))
+    if num_classes == 2:
+        print("{}: {}%".format(classes[0], (1-pred) * 100.0))
+        print("{}: {}%".format(classes[1], pred * 100.0))
+    else:
+        for cls, prob in zip(classes, pred):
+            print("{0:18}{1:8.4f}%".format(cls, prob * 100.0))

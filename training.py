@@ -89,13 +89,15 @@ datagen = ImageDataGenerator(
     validation_split=0.3
 )
 
+#dog or cat-> binary, if more, set "categorical"
+class_mode = "binary" if num_classes == 2 else "categorical"
 train_generator = datagen.flow_from_directory(
     data_dir,
     subset="training",
     target_size=(img_width, img_height),
     color_mode="rgb",
     classes=classes,
-    class_mode="binary", #dog or cat-> binary, if more, set "categorical"
+    class_mode=class_mode, 
     batch_size=batch_size,
     shuffle=True
 )
@@ -106,25 +108,28 @@ validation_generator = datagen.flow_from_directory(
     target_size=(img_width, img_height),
     color_mode="rgb",
     classes=classes,
-    class_mode="binary", # dog or cat-> binary, if more, set "categorical"
+    class_mode=class_mode,
     batch_size=batch_size,
     shuffle=True
 )
 
 # Model definition
+# If class_mode="binary", set 1 to Dense layer
+# If class_mode="categorical", set num_classes to Dense layer
+num_dense = 1 if num_classes == 2 else num_classes
+activation = "sigmoid" if num_classes == 2 else "softmax"
 base_model = get_base_model(ver, feature_dim)
 layer_output = base_model.output
 layer_output = Flatten()(layer_output)
 layer_output = Dense(256, activation="relu")(layer_output)
 layer_output = Dropout(0.5)(layer_output)
-layer_output = Dense(1, activation="sigmoid", kernel_regularizer=tf.keras.regularizers.l2(.0005))(layer_output)
-# If class_mode="binary", set 1 to Dense layer
-# If class_mode="categorical", set num_classes to Dense layer
+layer_output = Dense(num_dense, activation=activation)(layer_output)
 
 model = Model(base_model.input, layer_output)
 model.summary()
+loss = "binary_crossentropy" if num_classes == 2 else "categorical_crossentropy"
 model.compile(
-    loss="binary_crossentropy",
+    loss=loss,
 #    optimizer=SGD(lr=1e-4, momentum=0.9),
     optimizer="Adam",
     metrics=["accuracy"]
@@ -188,4 +193,4 @@ ax1.legend(h1+h2, l1+l2, loc='best')
 plt.xlabel("epoch")
 plt.savefig(ver_dir + "/accuracy.png")
 
-print(train_generator.class_indices)
+#print(train_generator.class_indices)
