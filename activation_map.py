@@ -9,6 +9,8 @@ from keras import backend as K
 from tensorflow.keras import models
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
 
+import gradcam
+
 input_filenames = sys.argv[1:]
 
 base_dir = "./"
@@ -24,7 +26,6 @@ feature_dim = (img_width, img_height, 3)
 model = tf.keras.models.load_model("InceptionResNetV2/weights-InceptionResNetV2.hdf5")
 model.summary()
 
-from testscripts import gradcam_tf2
 
 plt.figure()
 plt.tight_layout()
@@ -32,7 +33,7 @@ i = 1
 for input_filename in input_filenames:    
     img = img_to_array(load_img(input_filename, target_size=(img_height, img_width)))
 
-    plt.subplot(len(input_filenames), 4, i)
+    plt.subplot(len(input_filenames), 2, i)
     plt.axis("off")
     plt.imshow(array_to_img(img))
     plt.tight_layout()
@@ -42,12 +43,21 @@ for input_filename in input_filenames:
     target_layer = "conv_7b_ac"
 
     # guided gradcam
-    plt.subplot(len(input_filenames), 4, i)
+    plt.subplot(len(input_filenames), 2, i)
     plt.axis("off")
-    heatmap = gradcam_tf2.guided_grad_cam(model, img, target_layer, img_width, img_height)
+    heatmap = gradcam.guided_grad_cam(model, img, target_layer, img_width, img_height)
     plt.imshow(array_to_img(img))
     plt.imshow(heatmap, alpha=0.5, cmap='jet')
     i += 1
+
+    # gradcam++
+#    plt.subplot(len(input_filenames), 3, i)
+#    plt.axis("off")
+#    heatmap = gradcam.grad_cam_plus_plus(model, img, target_layer, img_width, img_height)
+#    plt.imshow(array_to_img(img))
+#    plt.imshow(heatmap, alpha=0.5, cmap='jet')
+ #   i += 1
+
 
 plt.show()
 #plt.savefig("heatmap.png")
