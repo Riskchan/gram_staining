@@ -27,37 +27,35 @@ model = tf.keras.models.load_model("InceptionResNetV2/weights-InceptionResNetV2.
 model.summary()
 
 
-plt.figure()
-plt.tight_layout()
+fig = plt.figure(figsize=(6.0,8.0))
+num_images = len(input_filenames)*2
+cols = 4
+rows = num_images//cols if num_images%cols == 0 else num_images//cols + 1
 i = 1
 for input_filename in input_filenames:    
     img = img_to_array(load_img(input_filename, target_size=(img_height, img_width)))
 
-    plt.subplot(len(input_filenames), 2, i)
-    plt.axis("off")
-    plt.imshow(array_to_img(img))
-    plt.tight_layout()
+    # Prediction
+    x = np.expand_dims(img, axis=0)
+    x = x / 255.0
+    pred = model.predict(x)
+    pred_idx = np.argmax(pred[0])
+
+    # Plot original image
+    ax = fig.add_subplot(rows, cols, i)
+    ax.axis("off")
+    ax.imshow(array_to_img(img))
+    ax.set_title("{}".format(classes[pred_idx]))
     i += 1
     
-    # Generate heatmap with GradCAM
+    # Generate heatmap with Guided GradCAM
     target_layer = "conv_7b_ac"
-
-    # guided gradcam
-    plt.subplot(len(input_filenames), 2, i)
-    plt.axis("off")
+    ax = fig.add_subplot(rows, cols, i)
+    ax.axis("off")
     heatmap = gradcam.guided_grad_cam(model, img, target_layer, img_width, img_height)
-    plt.imshow(array_to_img(img))
-    plt.imshow(heatmap, alpha=0.5, cmap='jet')
+    ax.imshow(array_to_img(img))
+    ax.imshow(heatmap, alpha=0.5, cmap='jet')
     i += 1
-
-    # gradcam++
-#    plt.subplot(len(input_filenames), 3, i)
-#    plt.axis("off")
-#    heatmap = gradcam.grad_cam_plus_plus(model, img, target_layer, img_width, img_height)
-#    plt.imshow(array_to_img(img))
-#    plt.imshow(heatmap, alpha=0.5, cmap='jet')
- #   i += 1
-
 
 plt.show()
 #plt.savefig("heatmap.png")
