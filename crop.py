@@ -6,7 +6,7 @@ from PIL import Image
 
 input_filenames = sys.argv[1:]
 crop_dir = "./cropped"
-crop_width, crop_height = 256, 256
+crop_width, crop_height = 512, 512
 
 for filename in input_filenames:
     name = filename.split("/")[-1].split(".")[0]
