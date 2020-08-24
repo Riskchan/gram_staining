@@ -2,5 +2,6 @@ accuracy.png
 images
 weights
 cropped
+class_indices.pickle
 *.hdf5
 __pycache__
