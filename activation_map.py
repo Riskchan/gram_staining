@@ -17,7 +17,10 @@ base_dir = "./"
 data_dir = base_dir + "images"
 
 # Parameters
-classes = [filename for filename in os.listdir(data_dir) if not filename.startswith('.')]
+class_indices_path = os.path.join(ver_dir, 'class_indices.pickle')
+with open(class_indices_path,'rb') as f:
+    class_indices = pickle.load(f)
+classes = list(class_indices.keys())
 num_classes = len(classes)
 img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)

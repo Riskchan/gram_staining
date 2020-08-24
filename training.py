@@ -1,4 +1,5 @@
 import os
+import pickle
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
@@ -112,6 +113,11 @@ validation_generator = datagen.flow_from_directory(
     batch_size=batch_size,
     shuffle=True
 )
+
+# Save class_indices
+class_indices_path = os.path.join(ver_dir, 'class_indices.pickle')
+with open(class_indices_path,'wb') as f:
+    pickle.dump(train_generator.class_indices, f)
 
 # Model definition
 # If class_mode="binary", set 1 to Dense layer
