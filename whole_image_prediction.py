@@ -51,6 +51,12 @@ n_height = height // crop_height
 n_wloop = n_width if width % crop_width == 0 else n_width + 1
 n_hloop = n_height if width % crop_height == 0 else n_height + 1
 
+# Summary
+num_non_ng = 0
+summary = dict.fromkeys(class_indices)
+for key in summary.keys():
+    summary[key] = 0
+
 # Plot original figure
 fig = plt.figure()
 
@@ -69,13 +75,20 @@ for i in range(n_wloop):
         x = x / 255.0
 
         # Prediction
-        print("####### Evaluating region ({:02d}, {:02d})... #######".format(i, j))
+        print("################# Evaluating region ({:02d}, {:02d})... #################".format(i, j))
         pred = model.predict(x)[0]
         for cls, prob in zip(classes, pred):
-            print("{0:30}{1:8.4f}%".format(cls, prob * 100.0))
+            print("{0:50}{1:8.4f}%".format(cls, prob * 100.0))
 
         class_idx = np.argmax(pred)
 
+        # Summary
+        if class_idx != background_idx:
+            num_non_ng += 1
+            for cls, prob in zip(classes, pred):
+                summary[cls] += prob*100.0
+
+        # Categorization
         if i < n_width and j < n_height:
             if class_idx == background_idx:
                 overlay = Image.new("RGBA", (crop_width, crop_height), (255, 255, 255, 0))
@@ -90,6 +103,12 @@ for i in range(n_wloop):
         draw.rectangle((0, 0, crop_width-1, crop_height-1), outline = (0, 0, 0))
         copy_img.paste(overlay, (i*crop_width, j*crop_height), overlay)
 
+print("########################### Summary #############################")
+for cls, prob in zip(classes, pred):
+    summary[cls] /= num_non_ng
+    print("{0:50}{1:8.4f}%".format(cls, summary[cls]))
+
+
 back = Image.new("RGB", (width, height+1200), (255, 255, 255))
 back.paste(copy_img, (0, 0))
 
@@ -101,13 +120,20 @@ classes_legend.append("Not inspected")
 rec_size = 200
 padding = 100
 legend_area = Image.new("RGBA", (width, 1200), (255, 255, 255, 255))
+
 rect = Image.new("RGBA", (rec_size, rec_size), (255, 0, 0, 50))
+draw = ImageDraw.Draw(rect)
+draw.rectangle((0, 0, rec_size-1, rec_size-1), outline = (0, 0, 0))
 legend_area.paste(rect, (0, padding), rect)
 
 rect = Image.new("RGBA", (rec_size, rec_size), (0, 0, 255, 50))
+draw = ImageDraw.Draw(rect)
+draw.rectangle((0, 0, rec_size-1, rec_size-1), outline = (0, 0, 0))
 legend_area.paste(rect, (0, rec_size+2*padding), rect)
 
 rect = Image.new("RGBA", (rec_size, rec_size), (0, 0, 0, 100))
+draw = ImageDraw.Draw(rect)
+draw.rectangle((0, 0, rec_size-1, rec_size-1), outline = (0, 0, 0))
 legend_area.paste(rect, (0, 2*rec_size+3*padding), rect)
 
 draw = ImageDraw.Draw(legend_area)
