@@ -4,7 +4,7 @@ import cv2
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 
@@ -52,10 +52,10 @@ n_wloop = n_width if width % crop_width == 0 else n_width + 1
 n_hloop = n_height if width % crop_height == 0 else n_height + 1
 
 # Plot original figure
-fig = plt.figure(figsize=(6.0,8.0))
+fig = plt.figure()
 
 # Plot prediction
-ax = fig.add_subplot(2, 1, 1)
+ax = fig.add_subplot(1, 1, 1)
 ax.axis("off")
 copy_img = img.copy()
 for i in range(n_wloop):
@@ -69,7 +69,7 @@ for i in range(n_wloop):
         x = x / 255.0
 
         # Prediction
-        print("Evaluating region ({:02d}, {:02d})...".format(i, j))
+        print("####### Evaluating region ({:02d}, {:02d})... #######".format(i, j))
         pred = model.predict(x)[0]
         for cls, prob in zip(classes, pred):
             print("{0:30}{1:8.4f}%".format(cls, prob * 100.0))
@@ -89,12 +89,33 @@ for i in range(n_wloop):
         draw = ImageDraw.Draw(overlay)
         draw.rectangle((0, 0, crop_width-1, crop_height-1), outline = (0, 0, 0))
         copy_img.paste(overlay, (i*crop_width, j*crop_height), overlay)
-ax.imshow(copy_img)
 
-# Testing
-ax = fig.add_subplot(2, 1, 2)
-ax.axis("off")
-legend_area = Image.new("RGBA", (width, int(height/4)), (0, 0, 0, 50))
-ax.imshow(legend_area)
+back = Image.new("RGB", (width, height+1200), (255, 255, 255))
+back.paste(copy_img, (0, 0))
+
+# Legend
+classes_legend = classes.copy()
+classes_legend.remove("Background")
+classes_legend.append("Not inspected")
+
+rec_size = 200
+padding = 100
+legend_area = Image.new("RGBA", (width, 1200), (255, 255, 255, 255))
+rect = Image.new("RGBA", (rec_size, rec_size), (255, 0, 0, 50))
+legend_area.paste(rect, (0, padding), rect)
+
+rect = Image.new("RGBA", (rec_size, rec_size), (0, 0, 255, 50))
+legend_area.paste(rect, (0, rec_size+2*padding), rect)
+
+rect = Image.new("RGBA", (rec_size, rec_size), (0, 0, 0, 100))
+legend_area.paste(rect, (0, 2*rec_size+3*padding), rect)
+
+draw = ImageDraw.Draw(legend_area)
+font = ImageFont.truetype("/System/Library/Fonts/Courier.dfont", 200)
+draw.text((rec_size + padding, padding), classes_legend[0], font=font, fill="black")
+draw.text((rec_size + padding, rec_size + 2*padding), classes_legend[1], font=font, fill="black")
+draw.text((rec_size + padding, 2*rec_size + 3*padding), classes_legend[2], font=font, fill="black")
+back.paste(legend_area, (0, height))
+ax.imshow(back)
 
 plt.show()
