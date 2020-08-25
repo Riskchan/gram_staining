@@ -13,7 +13,10 @@ import gradcam
 
 input_filenames = sys.argv[1:]
 
+ver = "InceptionResNetV2"
+
 base_dir = "./"
+ver_dir = base_dir + ver
 data_dir = base_dir + "images"
 
 # Parameters
