@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>S. aureus vs S. epidermidis</title>
+  </head>
+  <body>
+    <form method="post" action="/send" enctype="multipart/form-data">
+      <input type="file" id="img_file" name="img_file">
+      <input type="submit" value="Submit">
+    </form>
+    <p>
+      {% if img_url %}
+        <img src="{{ img_url }}">
+      {% endif %}
+      <br>
+        <ul>
+          {% for res in result %}
+            <li>{{res.type}}: {{res.prob}}%</li>
+          {% endfor %}
+        </ul>
+    </p>
+  </body>
+</html>

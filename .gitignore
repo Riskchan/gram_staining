@@ -4,4 +4,5 @@ weights
 cropped
 class_indices.pickle
 *.hdf5
+web/uploads
 __pycache__
