@@ -10,15 +10,15 @@
       <input type="submit" value="Submit">
     </form>
     <p>
-      {% if img_url %}
-        <img src="{{ img_url }}">
-      {% endif %}
-      <br>
         <ul>
           {% for res in result %}
             <li>{{res.type}}: {{res.prob}}%</li>
           {% endfor %}
         </ul>
+        <br>
+        {% if img_url %}
+        <img src="{{ img_url }}">
+        {% endif %}
     </p>
   </body>
 </html>
