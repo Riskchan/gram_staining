@@ -2,7 +2,6 @@ import os
 import io
 import pickle
 import numpy as np
-import cv2
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug.utils import secure_filename
 
@@ -40,24 +39,20 @@ def send():
     if request.method == 'POST':
         img_file = request.files['img_file']
 
-        # 変なファイル弾き
+        # Reject unexpected extensions
         if img_file and allowed_file(img_file.filename):
             filename = secure_filename(img_file.filename)
         else:
-            return ''' <p>許可されていない拡張子です</p> '''
+            return ''' <p>Extension not allowed</p> '''
 
-        # Convert image
-        f = img_file.stream.read()
-        bin_data = io.BytesIO(f)
-        file_bytes = np.asarray(bytearray(bin_data.read()), dtype=np.uint8)
-        img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-        # Resize for tensorflow
-        raw_img = cv2.resize(img, (img_width, img_height))
-        x = image.img_to_array(raw_img)
-        x = np.expand_dims(x, axis=0)
+        # Save/Load image
+        img_url = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        img_file.save(img_url)
+        img = image.load_img(img_url, target_size=(img_height, img_width))
 
         # [0, 1] transformation
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
         x = x / 255.0
 
         # Prediction
@@ -67,15 +62,11 @@ def send():
         for cls, prob in result:
             print("{0:18}{1:8.2f}%".format(cls, prob))
 
-        # サイズだけ変えたものも保存する
-        img_url = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        cv2.imwrite(img_url, img)
-
+        # Output results
         res = []
         for i in range(num_classes):
             res.append({'type': classes[i], 'prob': pred[i]})
 
-        print(res)
         return render_template('index.html', img_url=img_url, result = res)
 
     else:
