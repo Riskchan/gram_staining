@@ -48,6 +48,8 @@ def send():
             filename = secure_filename(img_file.filename)
         else:
             return ''' <p>Extension not allowed</p> '''
+    
+        name = filename.split(".")[0]
 
         # Save/Load image
         img_url = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -59,8 +61,8 @@ def send():
         width, height = img.size
         n_width = width // crop_width
         n_height = height // crop_height
-        n_wloop = n_width if width % crop_width == 0 else n_width + 1
-        n_hloop = n_height if width % crop_height == 0 else n_height + 1
+#        n_wloop = n_width if width % crop_width == 0 else n_width + 1
+#        n_hloop = n_height if width % crop_height == 0 else n_height + 1
 
         # Summary
         num_non_ng = 0
@@ -69,9 +71,10 @@ def send():
             summary[key] = 0
         
         copy_img = img.copy()
-        for i in range(n_wloop):
-            for j in range(n_hloop):
+        for i in range(n_width):
+            for j in range(n_height):
                 img_crop = copy_img.crop((i*crop_width, j*crop_height, (i+1)*crop_width, (j+1)*crop_height))
+                img_crop.save("{}/{}-{:03d}x{:03d}.png".format(app.config['UPLOAD_FOLDER'], name, i, j))
                 img_crop = img_crop.resize((img_width, img_height))
 
                 # [0, 1] transformation
@@ -107,7 +110,7 @@ def send():
         for i in range(num_classes):
             res.append({'type': classes[i], 'prob': summary[classes[i]]})
 
-        return render_template('index.html', img_url=img_url, result = res)
+        return render_template('index.html', img_dir=app.config['UPLOAD_FOLDER'], name = name, n_width = n_width, n_height = n_height, result = res)
 
     else:
         return redirect(url_for('index'))
