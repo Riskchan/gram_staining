@@ -35,12 +35,14 @@
       {% if result %}
         <hr class="my-4">
         <h2 class="display-4">Result</h2>
+        <h3>Summary</h3>
         <ul class="list-group list-group-flush">
           {% for res in result %}
             <li class="list-group-item">{{res.type}}: {{res.prob}}%</li>
           {% endfor %}
         </ul>
         {% if img_dir %}
+        <h3>Image analysis</h3>
           <div id="gallery">
             <script type="text/javascript">
               let div_width = document.getElementById('gallery').clientWidth;

@@ -2,6 +2,7 @@ import os
 import io
 import pickle
 import numpy as np
+from PIL import Image, ImageDraw
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug.utils import secure_filename
 
@@ -24,8 +25,8 @@ img_width, img_height = 256, 256
 feature_dim = (img_width, img_height, 3)
 
 background_idx = class_indices["Background"]
-#nonbg_class_idx = list(class_indices.values())
-#nonbg_class_idx.remove(background_idx)
+nonbg_class_idx = list(class_indices.values())
+nonbg_class_idx.remove(background_idx)
 
 # Load model
 model = tf.keras.models.load_model("weights/weights-InceptionResNetV2.hdf5")
@@ -74,10 +75,10 @@ def send():
         for i in range(n_width):
             for j in range(n_height):
                 img_crop = copy_img.crop((i*crop_width, j*crop_height, (i+1)*crop_width, (j+1)*crop_height))
-                img_crop.save("{}/{}-{:03d}x{:03d}.png".format(app.config['UPLOAD_FOLDER'], name, i, j))
-                img_crop = img_crop.resize((img_width, img_height))
+                img_save = img_crop.copy()
 
                 # [0, 1] transformation
+                img_crop = img_crop.resize((img_width, img_height))
                 x = image.img_to_array(img_crop)
                 x = np.expand_dims(x, axis=0)
                 x = x / 255.0
@@ -91,6 +92,18 @@ def send():
                     print("{0:50}{1:8.2f}%".format(cls, prob))
 
                 class_idx = np.argmax(pred)
+
+                # Image overlay
+                if class_idx == background_idx:
+                    overlay = Image.new("RGBA", (crop_width, crop_height), (255, 255, 255, 0))
+                elif class_idx == nonbg_class_idx[0]:
+                    overlay = Image.new("RGBA", (crop_width, crop_height), (255, 0, 0, 50))
+                elif class_idx == nonbg_class_idx[1]:
+                    overlay = Image.new("RGBA", (crop_width, crop_height), (0, 0, 255, 50))
+                draw = ImageDraw.Draw(overlay)
+                draw.rectangle((0, 0, crop_width-1, crop_height-1), outline = (0, 0, 0))
+                img_save.paste(overlay, (0, 0), overlay)
+                img_save.save("{}/{}-{:03d}x{:03d}.png".format(app.config['UPLOAD_FOLDER'], name, i, j))
 
                 # Summary
                 if class_idx != background_idx:
