@@ -9,6 +9,11 @@ from werkzeug.utils import secure_filename
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 
+def inverse_lookup(d, x):
+    for k,v in d.items():
+        if x == v:
+            return k
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = './uploads'
@@ -64,6 +69,7 @@ def send():
         n_height = height // crop_height
 #        n_wloop = n_width if width % crop_width == 0 else n_width + 1
 #        n_hloop = n_height if width % crop_height == 0 else n_height + 1
+        probs = [[""] * n_height for i in range(n_width)]
 
         # Summary
         num_non_ng = 0
@@ -90,6 +96,7 @@ def send():
                 result = zip(classes, pred)
                 for cls, prob in result:
                     print("{0:50}{1:8.2f}%".format(cls, prob))
+                    probs[i][j] +=  cls + ": " + format(prob, '.2f') + "% &lt;br&gt;"
 
                 class_idx = np.argmax(pred)
 
@@ -123,7 +130,8 @@ def send():
         for i in range(num_classes):
             res.append({'type': classes[i], 'prob': summary[classes[i]]})
 
-        return render_template('index.html', img_dir=app.config['UPLOAD_FOLDER'], name = name, n_width = n_width, n_height = n_height, result = res)
+        return render_template('index.html', img_dir=app.config['UPLOAD_FOLDER'], name = name, 
+                                n_width = n_width, n_height = n_height, result = res, probs = probs)
 
     else:
         return redirect(url_for('index'))

@@ -17,10 +17,10 @@
     </nav>
 
     <div class="jumbotron m-5">
-      <h1 class="display-4">TENGSA online   <small class="text-muted">Tenri Gram Staining Analyzer</small></h1>
+      <h1 class="display-3">TENGSA   <small class="text-muted">Tenri Gram Staining Analyzer</small></h1>
       <p class="lead">黄色ブドウ球菌とコアグラーゼ陰性菌の鑑別を人工知能で自動化します</p>
       <hr class="my-4">
-      <p>まずはファイルをアップロード</p>
+      <p>まずはファイルをアップロード（分析には数分かかります）</p>
       <form method="post" action="/send" enctype="multipart/form-data">
         <div class="input-group w-50">
           <div class="custom-file">
@@ -28,33 +28,39 @@
             <label class="custom-file-label" for="inputGroupFile04" data-browse="参照">ファイルを選んでください</label>
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-primary" type="submit" value="Submit" id="inputGroupFileAddon04">分析</button>
+            <button class="btn btn-outline-primary" type="submit" value="Submit" id="inputGroupFileAddon04">分析開始</button>
           </div>
         </div>
       </form>
+
       {% if result %}
         <hr class="my-4">
-        <h2 class="display-4">Result</h2>
-        <h3>Summary</h3>
+        <h2 class="display-3">Result</h2>
+        <h3 class="display-4">Summary</h3>
         <ul class="list-group list-group-flush">
           {% for res in result %}
             <li class="list-group-item">{{res.type}}: {{res.prob}}%</li>
           {% endfor %}
         </ul>
         {% if img_dir %}
-        <h3>Image analysis</h3>
+        <br>
+        <h3 class="display-4">Image analysis</h3>
           <div id="gallery">
             <script type="text/javascript">
               let div_width = document.getElementById('gallery').clientWidth;
               var w = "{{n_width|tojson}}";
               var h = "{{n_height|tojson}}";
               var img_size = div_width/w;
+              var probs = {{probs|tojson|safe}};
+              console.log(probs);
 
               document.getElementById('gallery').style["grid-template-columns"] = "repeat(" + w + ", 1fr)";
               for(var j=0; j<h; j++){
                 for(var i=0; i<w; i++){
                     var filename = "{{ img_dir }}" + "/" + "{{ name }}" + "-" + ("000" + i).slice(-3) + "x" + ("000" + j).slice(-3) + ".png"; 
-                    document.write('<img src=' + filename + '  class="img-fluid" width=' + img_size + ' height=' + img_size + '>');
+                    document.write('<img src=' + filename + 
+                      ' class="img-fluid" width=' + img_size + ' height=' + img_size + 
+                      ' data-toggle="popover" data-trigger="hover" data-content=' + '"' + probs[i][j] + '"' + '>');
                 }
               }
             </script>
@@ -70,6 +76,10 @@
           var fileName = $(this).prop('files')[0].name;
           //replace the "Choose a file" label
           $(this).next('.custom-file-label').html(fileName);
+      });
+
+      $('[data-toggle="popover"]').popover({
+        html:true
       });
     </script>
   </body>
