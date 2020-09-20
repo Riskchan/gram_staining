@@ -15,14 +15,15 @@ def inverse_lookup(d, x):
             return k
 
 app = Flask(__name__)
+ROOT = app.root_path
 
-UPLOAD_FOLDER = './uploads'
+UPLOAD_FOLDER = os.path.join(ROOT, 'uploads')
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'PNG', 'JPG'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = os.urandom(24)
 
 # Parameters
-with open('weights/class_indices.pickle','rb') as f:
+with open(os.path.join(ROOT, 'weights/class_indices.pickle'),'rb') as f:
     class_indices = pickle.load(f)
 classes = list(class_indices.keys())
 num_classes = len(classes)
@@ -34,7 +35,7 @@ nonbg_class_idx = list(class_indices.values())
 nonbg_class_idx.remove(background_idx)
 
 # Load model
-model = tf.keras.models.load_model("weights/weights-InceptionResNetV2.hdf5")
+model = tf.keras.models.load_model(os.path.join(ROOT, "weights/weights-InceptionResNetV2.hdf5"))
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -130,7 +131,7 @@ def send():
         for i in range(num_classes):
             res.append({'type': classes[i], 'prob': summary[classes[i]]})
 
-        return render_template('index.html', img_dir=app.config['UPLOAD_FOLDER'], name = name, 
+        return render_template('index.html', img_dir="uploads", name = name, 
                                 n_width = n_width, n_height = n_height, result = res, probs = probs)
 
     else:

@@ -1,3 +1,4 @@
+import os
 import sys
 import cv2
 import numpy as np
@@ -6,6 +7,8 @@ from PIL import Image
 
 input_filenames = sys.argv[1:]
 crop_dir = "./cropped"
+os.makedirs(crop_dir, exist_ok=True)
+
 crop_width, crop_height = 512, 512
 
 for filename in input_filenames:
