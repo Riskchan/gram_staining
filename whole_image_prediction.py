@@ -20,13 +20,13 @@ filename = sys.argv[1]
 
 # Load image
 img = Image.open(filename)
-width, height = img.size
 
 # Image classification
 crop_width, crop_height = 512, 512
 class_indices, result = image_analysis.image_classifier(img, crop_width, crop_height)
 
 # Calculate overall probability
+#overall_prob = image_analysis.calc_overall_probability(class_indices, result, max_method=True, max_key="Staphylococcus aureus")
 overall_prob = image_analysis.calc_overall_probability(class_indices, result)
 
 # Classes and indices
@@ -61,6 +61,7 @@ for ss in result:
         j += 1
     i += 1
 
+width, height = img.size
 back = Image.new("RGB", (width, height+1200), (255, 255, 255))
 back.paste(copy_img, (0, 0))
 

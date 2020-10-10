@@ -55,7 +55,7 @@ def image_classifier(img, crop_width, crop_height, verbose=True):
     
     return class_indices, result
 
-def calc_overall_probability(class_indices, result, verbose=True):
+def calc_overall_probability(class_indices, result, max_method=False, max_key="", verbose=True):
     # Classes and indices
     classes = list(class_indices.keys())
     background_idx = class_indices["Background"]
@@ -75,8 +75,14 @@ def calc_overall_probability(class_indices, result, verbose=True):
                     summary[cls].append(prob*100)
 
     overall_prob = dict.fromkeys(class_indices)
-    for key in overall_prob.keys():
-        overall_prob[key] = sum(summary[key])/len(summary[key])
+
+    if max_method:
+        idx = np.argmax(summary[max_key])
+        for key in overall_prob.keys():
+            overall_prob[key] = summary[key][idx]
+    else:
+        for key in overall_prob.keys():
+            overall_prob[key] = sum(summary[key])/len(summary[key])
 
     if verbose:
         print("########################### Summary #############################")
