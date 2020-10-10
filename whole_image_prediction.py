@@ -26,22 +26,17 @@ width, height = img.size
 crop_width, crop_height = 512, 512
 class_indices, result = image_analysis.image_classifier(img, crop_width, crop_height)
 
-classes = list(class_indices.keys())
-num_classes = len(classes)
+# Calculate overall probability
+overall_prob = image_analysis.calc_overall_probability(class_indices, result)
 
+# Classes and indices
+classes = list(class_indices.keys())
 background_idx = class_indices["Background"]
 nonbg_class_idx = list(class_indices.values())
 nonbg_class_idx.remove(background_idx)
 
-# Summary
-summary = dict.fromkeys(class_indices)
-for key in summary.keys():
-    summary[key] = []
-
-# Plot original figure
+# Plotting
 fig = plt.figure()
-
-# Plot prediction
 ax = fig.add_subplot(1, 1, 1)
 ax.axis("off")
 copy_img = img.copy()
@@ -51,11 +46,6 @@ for ss in result:
     j = 0
     for s in ss:
         class_idx = np.argmax(s)
-
-        # Summary
-        if class_idx != background_idx:
-            for cls, prob in zip(classes, s):
-                summary[cls].append(prob*100)
 
         # Categorization
         if class_idx == background_idx:
@@ -70,11 +60,6 @@ for ss in result:
         copy_img.paste(overlay, (i*crop_width, j*crop_height), overlay)
         j += 1
     i += 1
-
-print("########################### Summary #############################")
-for cls in classes:
-    prob = sum(summary[cls])/len(summary[cls])
-    print("{0:50}{1:8.4f}%".format(cls, prob))
 
 back = Image.new("RGB", (width, height+1200), (255, 255, 255))
 back.paste(copy_img, (0, 0))

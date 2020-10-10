@@ -5,7 +5,7 @@ import tensorflow as tf
 from PIL import Image
 from tensorflow.keras.preprocessing import image
 
-def image_classifier(img, crop_width, crop_height):
+def image_classifier(img, crop_width, crop_height, verbose=True):
 
     ver = "InceptionResNetV2_20201003"
     base_dir = "./"
@@ -29,7 +29,7 @@ def image_classifier(img, crop_width, crop_height):
     n_width = width // crop_width
     n_height = height // crop_height
 
-    summary = []
+    result = []
 
     # Plot prediction
     copy_img = img.copy()
@@ -45,11 +45,42 @@ def image_classifier(img, crop_width, crop_height):
             x = x / 255.0
 
             # Prediction
-            print("################# Evaluating region ({:02d}, {:02d})... #################".format(i, j))
             pred = model.predict(x)[0]
             sub_summary.append(pred)
-            for cls, prob in zip(classes, pred):
-                print("{0:50}{1:8.4f}%".format(cls, prob * 100.0))
-        summary.append(sub_summary)
+            if verbose:
+                print("################# Evaluating region ({:02d}, {:02d})... #################".format(i, j))
+                for cls, prob in zip(classes, pred):
+                    print("{0:50}{1:8.4f}%".format(cls, prob * 100.0))
+        result.append(sub_summary)
     
-    return class_indices, summary
+    return class_indices, result
+
+def calc_overall_probability(class_indices, result, verbose=True):
+    # Classes and indices
+    classes = list(class_indices.keys())
+    background_idx = class_indices["Background"]
+
+    # Summary
+    summary = dict.fromkeys(class_indices)
+    for key in summary.keys():
+        summary[key] = []
+
+    for ss in result:
+        for s in ss:
+            class_idx = np.argmax(s)
+
+            # Summary
+            if class_idx != background_idx:
+                for cls, prob in zip(classes, s):
+                    summary[cls].append(prob*100)
+
+    overall_prob = dict.fromkeys(class_indices)
+    for key in overall_prob.keys():
+        overall_prob[key] = sum(summary[key])/len(summary[key])
+
+    if verbose:
+        print("########################### Summary #############################")
+        for key in overall_prob.keys():
+            print("{0:50}{1:8.4f}%".format(key, overall_prob[key]))
+
+    return overall_prob
