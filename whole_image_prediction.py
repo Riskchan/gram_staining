@@ -34,10 +34,9 @@ nonbg_class_idx = list(class_indices.values())
 nonbg_class_idx.remove(background_idx)
 
 # Summary
-num_non_ng = 0
 summary = dict.fromkeys(class_indices)
 for key in summary.keys():
-    summary[key] = 0
+    summary[key] = []
 
 # Plot original figure
 fig = plt.figure()
@@ -55,9 +54,8 @@ for ss in result:
 
         # Summary
         if class_idx != background_idx:
-            num_non_ng += 1
             for cls, prob in zip(classes, s):
-                summary[cls] += prob*100.0
+                summary[cls].append(prob*100)
 
         # Categorization
         if class_idx == background_idx:
@@ -75,9 +73,8 @@ for ss in result:
 
 print("########################### Summary #############################")
 for cls in classes:
-    summary[cls] /= num_non_ng
-    print("{0:50}{1:8.4f}%".format(cls, summary[cls]))
-
+    prob = sum(summary[cls])/len(summary[cls])
+    print("{0:50}{1:8.4f}%".format(cls, prob))
 
 back = Image.new("RGB", (width, height+1200), (255, 255, 255))
 back.paste(copy_img, (0, 0))
