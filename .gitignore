@@ -2,6 +2,7 @@ accuracy.png
 images
 weights
 cropped
+ROC
 class_indices.pickle
 *.hdf5
 web/uploads
