@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing import image
 
 def image_classifier(img, crop_width, crop_height, verbose=True):
 
-    ver = "InceptionResNetV2_20201003"
+    ver = "InceptionResNetV2_20201011"
     base_dir = "./"
     ver_dir = base_dir + ver
 
@@ -21,7 +21,7 @@ def image_classifier(img, crop_width, crop_height, verbose=True):
     classes = list(class_indices.keys())
 
     # Sizes of tensorflow input
-    img_width, img_height = 256, 256
+    img_width, img_height = 512, 512
     feature_dim = (img_width, img_height, 3)
 
     # Image operation
