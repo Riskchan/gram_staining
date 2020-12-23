@@ -6,7 +6,7 @@ from tensorflow.keras.layers import Dense, Input, Flatten, Dropout, Conv2D, MaxP
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import VGG16, InceptionV3, InceptionResNetV2, EfficientNetB0
+from tensorflow.keras.applications import VGG16, InceptionV3, InceptionResNetV2, EfficientNetB0, EfficientNetB7
 from tensorflow.python.keras.engine import training
 from tensorflow.python.keras.layers import VersionAwareLayers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -25,6 +25,11 @@ def get_base_model(modelname, input_shape):
         for layer in base_model.layers[-20:]:
                 if not isinstance(layer, layers.BatchNormalization):
                     layer.trainable = True
+
+    elif modelname == "EfficientNetB7":
+        base_model = EfficientNetB7(include_top=False, weights="imagenet", input_shape=input_shape)
+        for layer in base_model.layers:
+            layer.trainable = True
 
     elif modelname == "InceptionV3":
         base_model = InceptionV3(include_top=False, weights="imagenet", input_shape=input_shape)
